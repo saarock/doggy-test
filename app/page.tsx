@@ -2,6 +2,7 @@ import { stackServerApp } from "@/lib/auth/stack-auth";
 import { redirect } from "next/navigation";
 import LandingPageWrapper from "@/components/landing-page-wrapper";
 
+
 export default async function Home() {
   const user = await stackServerApp.getUser();
   console.log("[v0] Home page - user:", user ? user.id : "not authenticated");
@@ -10,5 +11,11 @@ export default async function Home() {
     redirect("/discover");
   }
 
-  return <LandingPageWrapper />;
+  return (
+    <>
+      <LandingPageWrapper />
+      {/* Render the feedback widget even for non-logged in users */}
+    
+    </>
+  );
 }

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useStackApp } from "@stackframe/stack"
 import { cn } from "@/lib/utils"
+import UserbackWidget from "./user-back-widget"
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -35,6 +36,13 @@ export function AppLayout({ children, user }: AppLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {
+     <UserbackWidget
+        userId={user?.id}
+        name={user.name}
+        email={user?.email ?? undefined}
+      />
+     }
       {/* Top Navigation */}
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
