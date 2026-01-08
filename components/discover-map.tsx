@@ -114,7 +114,7 @@ export function DiscoverMap() {
         <Button
           variant="secondary"
           size="sm"
-          className="pointer-events-auto shadow-lg gap-2"
+          className="pointer-events-auto shadow-lg gap-2 z-50 relative right-3"
           onClick={() => setShowFilters(true)}
         >
           <Filter className="w-4 h-4" />
