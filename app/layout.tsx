@@ -5,9 +5,7 @@ import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackServerApp } from "@/lib/auth/stack-auth";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
-import { useChatSocket } from "@/hooks/use-chat-sockets";
 import { SocketProvider } from "@/lib/socket";
-import { Dog } from "lucide-react";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -16,15 +14,7 @@ export const metadata: Metadata = {
   title: "Nearby Connect - Meet People Near You",
   description:
     "Discover and connect with people in your area. Location-based social chat platform.",
-  generator: "v0.app",
-  icons: {
-    icon: [
-      { url: "/icon-light-32x32.png", media: "(prefers-color-scheme: light)" },
-      { url: "/icon-dark-32x32.png", media: "(prefers-color-scheme: dark)" },
-      { url: "", type: "image/svg+xml" },
-    ],
-    apple: "/apple-icon.png",
-  },
+
 };
 
 export const viewport: Viewport = {
@@ -43,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={"dark"} >
+    <html lang="en" suppressHydrationWarning className="dark">
       <body className="font-sans antialiased">
         <SocketProvider>
           <StackProvider app={stackServerApp}>
