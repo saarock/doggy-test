@@ -14,10 +14,12 @@ export interface User {
   last_seen: Date
   created_at: Date
   updated_at: Date
+  goals: string[]
 }
 
 export interface UserWithDistance extends User {
   distance_km: number
+  count?: number;
 }
 
 export interface ChatRoom {
@@ -68,6 +70,7 @@ export interface CreateUserInput {
   avatar_url?: string
   age_confirmed: boolean
   latitude?: number
+  goals: string[]
   longitude?: number
 }
 
@@ -76,6 +79,7 @@ export interface UpdateUserInput {
   bio?: string
   avatar_url?: string
   latitude?: number
+  // goals: string[]
   longitude?: number
   is_online?: boolean
 }

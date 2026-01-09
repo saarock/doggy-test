@@ -29,6 +29,7 @@ export function AppLayout({ children, user }: AppLayoutProps) {
   const app = useStackApp()
 
   const navigation = [
+    { name: "Discover As Card", href: "/discover-card", icon: UserIcon },
     { name: "Discover", href: "/discover", icon: MapPin },
     { name: "Chats", href: "/chats", icon: MessageCircle },
     { name: "Profile", href: "/profile", icon: UserIcon },

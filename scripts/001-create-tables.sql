@@ -16,7 +16,14 @@ CREATE TABLE IF NOT EXISTS users (
   is_online BOOLEAN DEFAULT FALSE,
   last_seen TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+goal TEXT CHECK (goal IN (
+    'job',
+    'service',
+    'networking',
+    'learning',
+    'chat'
+  )),
 );
 
 -- Create spatial index for fast geo-queries

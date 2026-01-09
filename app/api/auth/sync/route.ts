@@ -10,7 +10,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { ageConfirmed, latitude, longitude } = await request.json()
+    const { ageConfirmed, latitude, longitude, goals } = await request.json()
+
+    console.log(goals)
 
     const user = await userService.upsertUser({
       id: authUser.id,
@@ -20,6 +22,7 @@ export async function POST(request: Request) {
       age_confirmed: ageConfirmed || false,
       latitude,
       longitude,
+      goals: goals || []
     })
 
     return NextResponse.json(user)

@@ -13,13 +13,14 @@ export async function GET(request: Request) {
     const latitude = Number.parseFloat(searchParams.get("latitude") || "0")
     const longitude = Number.parseFloat(searchParams.get("longitude") || "0")
     const radius = Number.parseFloat(searchParams.get("radius") || "10")
+    
 
     if (!latitude || !longitude) {
       return NextResponse.json({ error: "Location required" }, { status: 400 })
     }
 
     // Update current user's location
-    await userService.updateUser(authUser.id, { latitude, longitude, is_online: true })
+    await userService.updateUser(authUser.id, { latitude, longitude, is_online: true})
 
     // Get nearby users
     const nearbyUsers = await userService.getNearbyUsers(authUser.id, latitude, longitude, radius)

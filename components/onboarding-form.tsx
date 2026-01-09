@@ -6,17 +6,21 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { MapPin, Loader2, AlertCircle } from "lucide-react"
+import { MapPin, Loader2, AlertCircle, Check, ChevronDown } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import * as Select from "@radix-ui/react-select"
+import { USER_GOALS } from "@/constants"
 
 export function OnboardingForm() {
   const router = useRouter()
   const [ageConfirmed, setAgeConfirmed] = useState(false)
   const [locationGranted, setLocationGranted] = useState(false)
+  const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null)
 
+  // request geolocation
   const requestLocation = () => {
     setError(null)
     if (!navigator.geolocation) {
@@ -40,6 +44,16 @@ export function OnboardingForm() {
     )
   }
 
+  // toggle goal selection
+  const toggleGoal = (goal: string) => {
+    if (selectedGoals.includes(goal)) {
+      setSelectedGoals(selectedGoals.filter((g) => g !== goal))
+    } else {
+      setSelectedGoals([...selectedGoals, goal])
+    }
+  }
+
+  // submit form
   const handleSubmit = async () => {
     if (!ageConfirmed || !location) return
 
@@ -54,6 +68,7 @@ export function OnboardingForm() {
           ageConfirmed: true,
           latitude: location.latitude,
           longitude: location.longitude,
+          goals: selectedGoals, // send array of selected goals
         }),
       })
 
@@ -131,13 +146,36 @@ export function OnboardingForm() {
               </p>
             )}
           </div>
+
+          {/* Multi-Select Goals */}
+          <div>
+            <Label className="text-xl font-black tracking-tighter block leading-tight mb-2">
+              Why are you here?
+            </Label>
+
+            <div className="border rounded-md bg-background">
+              {USER_GOALS.map((goal) => (
+                <div
+                  key={goal}
+                  className={`flex m-1 items-center justify-between px-4 py-3 cursor-pointer hover:bg-accent rounded-md ${selectedGoals.includes(goal) ? "bg-primary/20" : ""
+                    }`}
+                  onClick={() => toggleGoal(goal)}
+                >
+                  <span>{goal}</span>
+                  {selectedGoals.includes(goal) && <Check className="w-5 h-5 text-primary" />}
+                </div>
+              ))}
+            </div>
+          </div>
+
         </CardContent>
+
         <CardFooter className="pb-10 px-8">
           <Button
             className="w-full h-14 text-xl font-black rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
             size="lg"
             onClick={handleSubmit}
-            disabled={!ageConfirmed || !locationGranted || isLoading}
+            disabled={!ageConfirmed || !locationGranted || isLoading || selectedGoals.length === 0}
           >
             {isLoading ? <Loader2 className="w-6 h-6 mr-2 animate-spin" /> : "Let's Go! 🚀"}
           </Button>

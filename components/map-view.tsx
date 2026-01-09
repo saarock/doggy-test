@@ -5,6 +5,7 @@ import type { UserWithDistance } from "@/lib/db/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
+
 interface MapViewProps {
   center: { latitude: number; longitude: number }
   users: UserWithDistance[]
@@ -33,6 +34,7 @@ export function MapView({ center, users, onUserSelect, selectedUserId }: MapView
     return () => window.removeEventListener("resize", updateDimensions)
   }, [])
 
+  
   // Convert lat/lng to pixel position (simple projection)
   const toPixel = useCallback(
     (lat: number, lng: number) => {
@@ -40,7 +42,7 @@ export function MapView({ center, users, onUserSelect, selectedUserId }: MapView
 
       // Simple mercator-like projection centered on user
       const scale = 5000 // Adjust for zoom level
-      const x = dimensions.width / 2 + (lng - center.longitude) * scale
+      const x = dimensions.width / 2 + (lng - center.longitude) * scale + 40
       const y = dimensions.height / 2 - (lat - center.latitude) * scale
 
       return { x, y }

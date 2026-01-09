@@ -17,7 +17,7 @@ export default async function AppGroupLayout({
 
   // Check if user has completed onboarding
   const dbUser = await userService.getUserById(user.id);
-  if (!dbUser || !dbUser.age_confirmed) {
+  if (!dbUser || !dbUser.age_confirmed || !dbUser.goals || dbUser.goals.length <= 0) {
     redirect("/onboarding");
   }
 

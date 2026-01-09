@@ -11,40 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Loader2, MapPin, Users, Filter } from "lucide-react"
 import { SkeletonUserCard } from "@/components/ui/skeleton"
+import useLocation from "@/hooks/useLocation"
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export function DiscoverMap() {
-  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null)
   const [radius, setRadius] = useState(10)
   const [selectedUser, setSelectedUser] = useState<UserWithDistance | null>(null)
   const [showFilters, setShowFilters] = useState(false)
-  const [locationError, setLocationError] = useState<string | null>(null)
-
-  // Get user's location
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setLocationError("Geolocation is not supported")
-      return
-    }
-
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        })
-        setLocationError(null)
-      },
-      (error) => {
-        setLocationError("Unable to get location")
-        console.error(error)
-      },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 },
-    )
-
-    return () => navigator.geolocation.clearWatch(watchId)
-  }, [])
+  const { location, locationError } = useLocation();
 
   // Fetch nearby users
   const { data: nearbyUsers, isLoading } = useSWR<UserWithDistance[]>(
