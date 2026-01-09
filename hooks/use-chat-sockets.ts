@@ -17,14 +17,16 @@ export const useChatSocket = (roomId: string, currentUserId: string, recipientId
   useEffect(() => {
     if (!socket) return;
 
-    // Register for personal notifications (redundant but safe)
-    socket.emit("register", currentUserId);
-
-    // Join the chat room
-    socket.emit("join", roomId);
+    // Helper to register and join room
+    const setupSocket = () => {
+      console.log(`useChatSocket: Registering user ${currentUserId} and joining room ${roomId}`);
+      socket.emit("register", currentUserId);
+      socket.emit("join", roomId);
+    };
 
     // Named listener for specific cleanup
     const onMessage = (msg: Message) => {
+      console.log("useChatSocket: Received message:", msg);
       setMessages((prev) => [...prev, msg]);
     };
 
@@ -39,6 +41,12 @@ export const useChatSocket = (roomId: string, currentUserId: string, recipientId
     // Listen for events
     socket.on("message", onMessage);
     socket.on("typing", onTyping);
+    socket.on("connect", setupSocket);
+
+    // Initial setup if already connected
+    if (socket.connected) {
+      setupSocket();
+    }
 
     // Fetch initial messages once
     fetch(`/api/chat/rooms/${roomId}/messages`)
@@ -49,8 +57,9 @@ export const useChatSocket = (roomId: string, currentUserId: string, recipientId
       .catch(console.error);
 
     return () => {
-      socket?.off("message", onMessage);
-      socket?.off("typing", onTyping);
+      socket.off("message", onMessage);
+      socket.off("typing", onTyping);
+      socket.off("connect", setupSocket);
       if (typingTimeout.current) clearTimeout(typingTimeout.current);
     };
   }, [roomId, currentUserId, socket]);

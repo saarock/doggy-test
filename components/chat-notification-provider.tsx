@@ -104,17 +104,26 @@ export function ChatNotificationProvider({
             })
         }
 
-        // Register for personal notifications
-        console.log(`Notification Provider: Registering for user notifications: user_${currentUser.id}`);
-        socket.emit("register", currentUser.id);
+        // Helper to register the user for notifications
+        const registerUser = () => {
+            console.log(`Notification Provider: Registering for user notifications: user_${currentUser.id}`);
+            socket.emit("register", currentUser.id);
+        }
 
-        // Listen for new messages
-        console.log("Notification Provider: Registering message listener");
+        // Listen for message and connect events
+        console.log("Notification Provider: Registering listeners");
         socket.on("message", handleNewMessage)
+        socket.on("connect", registerUser)
+
+        // Register immediately if already connected
+        if (socket.connected) {
+            registerUser();
+        }
 
         return () => {
-            console.log("Notification Provider: Unregistering message listener");
+            console.log("Notification Provider: Unregistering listeners");
             socket.off("message", handleNewMessage)
+            socket.off("connect", registerUser)
         }
     }, [socket, currentUser.id, pathname, router])
 
