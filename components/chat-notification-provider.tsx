@@ -29,103 +29,94 @@ export function ChatNotificationProvider({
     // Initialize notification sound
     const notificationSound = typeof window !== "undefined" ? new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3") : null;
 
+    // Use a ref for the pathname to avoid re-registering listeners on every navigation
+    const pathnameRef = useRef(pathname);
     useEffect(() => {
-        if (!socket) {
-            console.log("Notification Provider: No socket available yet");
-            return;
+        pathnameRef.current = pathname;
+    }, [pathname]);
+
+    // Handle user registration for personal room (stable effect)
+    useEffect(() => {
+        if (!socket || !currentUser.id) return;
+
+        const registerUser = () => {
+            console.log(`[Notification Provider] Registering for user_${currentUser.id}`);
+            socket.emit("register", currentUser.id);
         }
 
+        socket.on("connect", registerUser);
+        if (socket.connected) registerUser();
+
+        return () => {
+            socket.off("connect", registerUser);
+        };
+    }, [socket, currentUser.id]);
+
+    // Handle message listening (stable effect)
+    useEffect(() => {
+        if (!socket) return;
+
         const handleNewMessage = async (message: MessageNotification) => {
-            console.log("Notification Provider: Received new message:", message);
+            console.log("[Notification Provider] Received message:", message);
 
             // Don't show notification if it's from current user
-            if (message.sender_id === currentUser.id) {
-                console.log("Notification Provider: Filtering out own message");
-                return;
-            }
+            if (message.sender_id === currentUser.id) return;
 
             // Don't show notification if user is on the chat page for this room
-            const isOnChatPage = pathname?.startsWith(`/chats/${message.chat_room_id}`)
+            // Use the ref here for the latest pathname without triggering re-registration
+            const isOnChatPage = pathnameRef.current?.startsWith(`/chats/${message.chat_room_id}`);
             if (isOnChatPage) {
-                console.log("Notification Provider: User is on chat page, skipping notification");
+                console.log("[Notification Provider] User is on chat page, skipping toast");
                 return;
             }
 
             // Play notification sound
             if (notificationSound) {
-                notificationSound.play().catch(e => console.log("Sound play failed (interaction required):", e));
+                notificationSound.play().catch(e => console.log("Sound play failed:", e));
             }
 
-            // Fetch sender information
-            let senderInfo: User | null = null
+            // Fetch sender info and show toast
             try {
-                const response = await fetch(`/api/users/${message.sender_id}`)
-                if (response.ok) {
-                    senderInfo = await response.json()
-                }
-            } catch (error) {
-                console.error("Failed to fetch sender info:", error)
-            }
+                const response = await fetch(`/api/users/${message.sender_id}`);
+                const senderInfo: User = response.ok ? await response.json() : null;
 
-            // Show toast notification
-            toast({
-                duration: 5000,
-                className: "cursor-pointer",
-                title: (
-                    <div className="flex items-center gap-3">
-                        <Avatar className="w-10 h-10 rounded-xl border-2 border-background shadow-md">
-                            <AvatarImage
-                                src={senderInfo?.avatar_url || undefined}
-                                alt={senderInfo?.name || "User"}
-                            />
-                            <AvatarFallback className="bg-primary/10 text-primary font-black text-sm rounded-xl">
-                                {senderInfo?.name?.charAt(0) || "?"}
-                            </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                            <div className="font-black text-base tracking-tight">
-                                {senderInfo?.name || "Someone"}
-                            </div>
-                            <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1.5">
-                                <MessageCircle className="w-3 h-3" />
-                                New Message
+                toast({
+                    duration: 5000,
+                    className: "cursor-pointer",
+                    title: (
+                        <div className="flex items-center gap-3">
+                            <Avatar className="w-10 h-10 rounded-xl border-2 border-background shadow-md">
+                                <AvatarImage src={senderInfo?.avatar_url || undefined} alt={senderInfo?.name || "User"} />
+                                <AvatarFallback className="bg-primary/10 text-primary font-black text-sm rounded-xl">
+                                    {senderInfo?.name?.charAt(0) || "?"}
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                                <div className="font-black text-base tracking-tight">{senderInfo?.name || "Someone"}</div>
+                                <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1.5">
+                                    <MessageCircle className="w-3 h-3" />
+                                    New Message
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ),
-                description: (
-                    <p className="text-sm font-medium text-foreground/80 mt-2 line-clamp-2 leading-relaxed">
-                        {message.content}
-                    </p>
-                ),
-                onClick: () => {
-                    router.push(`/chats/${message.chat_room_id}`)
-                },
-            })
-        }
+                    ),
+                    description: (
+                        <p className="text-sm font-medium text-foreground/80 mt-2 line-clamp-2 leading-relaxed">
+                            {message.content}
+                        </p>
+                    ),
+                    onClick: () => router.push(`/chats/${message.chat_room_id}`),
+                });
+            } catch (error) {
+                console.error("Failed to show toast:", error);
+            }
+        };
 
-        // Helper to register the user for notifications
-        const registerUser = () => {
-            console.log(`Notification Provider: Registering for user notifications: user_${currentUser.id}`);
-            socket.emit("register", currentUser.id);
-        }
-
-        // Listen for message and connect events
-        console.log("Notification Provider: Registering listeners");
-        socket.on("message", handleNewMessage)
-        socket.on("connect", registerUser)
-
-        // Register immediately if already connected
-        if (socket.connected) {
-            registerUser();
-        }
-
+        socket.on("message", handleNewMessage);
         return () => {
-            console.log("Notification Provider: Unregistering listeners");
-            socket.off("message", handleNewMessage)
-            socket.off("connect", registerUser)
-        }
-    }, [socket, currentUser.id, pathname, router])
+            socket.off("message", handleNewMessage);
+        };
+    }, [socket, currentUser.id, router]);
 
     return <>{children}</>
 }

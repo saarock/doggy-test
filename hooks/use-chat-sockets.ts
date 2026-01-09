@@ -76,6 +76,7 @@ export const useChatSocket = (roomId: string, currentUserId: string, recipientId
       created_at: new Date(),
     };
     // Send message to server
+    console.log("useChatSocket: Emitting message to server:", tempMessage);
     socket?.emit("message", tempMessage);
     // Save to database via your backend API
     try {
