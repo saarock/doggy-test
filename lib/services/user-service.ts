@@ -40,20 +40,48 @@ export const userService = {
   },
 
   // Get user by ID
+  // Get user by ID
   async getUserById(id: string): Promise<User | null> {
     const result = await sql`
-      SELECT * FROM users WHERE id = ${id}
-    `;
-    return (result[0] as User) || null;
+    SELECT * FROM users WHERE id = ${id}
+  `;
+
+    const user = result[0];
+    if (!user) return null;
+
+    return {
+      ...user,
+      goals: Array.isArray(user.goals)
+        ? user.goals
+        : (user.goals || "")
+          .replace(/[{}]/g, "")
+          .split(",")
+          .map((g: any) => g.trim())
+          .filter(Boolean),
+    } as User;
   },
 
   // Get user by email
   async getUserByEmail(email: string): Promise<User | null> {
     const result = await sql`
-      SELECT * FROM users WHERE email = ${email}
-    `;
-    return (result[0] as User) || null;
+    SELECT * FROM users WHERE email = ${email}
+  `;
+
+    const user = result[0];
+    if (!user) return null;
+
+    return {
+      ...user,
+      goals: Array.isArray(user.goals)
+        ? user.goals
+        : (user.goals || "")
+          .replace(/[{}]/g, "")
+          .split(",")
+          .map((g: any) => g.trim())
+          .filter(Boolean),
+    } as User;
   },
+
 
   // Update user profile
   async updateUser(id: string, input: UpdateUserInput): Promise<User | null> {
@@ -93,9 +121,8 @@ export const userService = {
           latitude = COALESCE(${input.latitude || null}, latitude),
           longitude = COALESCE(${input.longitude || null}, longitude),
           is_online = COALESCE(${input.is_online ?? null}, is_online),
-          last_seen = CASE WHEN ${
-            input.is_online ?? null
-          } = true THEN NOW() ELSE last_seen END,
+          last_seen = CASE WHEN ${input.is_online ?? null
+      } = true THEN NOW() ELSE last_seen END,
           updated_at = NOW()
       WHERE id = ${id}
       RETURNING *

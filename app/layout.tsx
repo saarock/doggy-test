@@ -6,6 +6,7 @@ import { stackServerApp } from "@/lib/auth/stack-auth";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SocketProvider } from "@/lib/socket";
+import { Toaster } from "@/components/ui/toaster";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -39,6 +40,7 @@ export default function RootLayout({
           <StackProvider app={stackServerApp}>
             <StackTheme>{children}</StackTheme>
           </StackProvider>
+          <Toaster />
           <Analytics />
         </SocketProvider>
       </body>

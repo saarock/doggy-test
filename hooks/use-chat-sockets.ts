@@ -7,7 +7,7 @@ import { useSocket } from "@/lib/socket";
 
 
 
-export const useChatSocket = (roomId: string, currentUserId: string) => {
+export const useChatSocket = (roomId: string, currentUserId: string, recipientId?: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeout = useRef<NodeJS.Timeout>(null);
@@ -15,49 +15,53 @@ export const useChatSocket = (roomId: string, currentUserId: string) => {
 
 
   useEffect(() => {
-    if (!socket) {
-      socket = io("http://localhost:4000");
-    }
+    if (!socket) return;
+
+    // Register for personal notifications (redundant but safe)
+    socket.emit("register", currentUserId);
 
     // Join the chat room
     socket.emit("join", roomId);
 
-    // Listen for incoming messages
-    socket.on("message", (msg: Message) => {
+    // Named listener for specific cleanup
+    const onMessage = (msg: Message) => {
       setMessages((prev) => [...prev, msg]);
-    });
+    };
 
-    // Listen for typing events
-    socket.on("typing", (userId: string) => {
+    const onTyping = (userId: string) => {
       if (userId !== currentUserId) {
         setIsTyping(true);
-        clearTimeout(typingTimeout.current!);
+        if (typingTimeout.current) clearTimeout(typingTimeout.current);
         typingTimeout.current = setTimeout(() => setIsTyping(false), 1000);
       }
-    });
+    };
+
+    // Listen for events
+    socket.on("message", onMessage);
+    socket.on("typing", onTyping);
 
     // Fetch initial messages once
     fetch(`/api/chat/rooms/${roomId}/messages`)
       .then((res) => res.json())
       .then((data: Message[]) => {
-        console.log(data);
-
         setMessages(data);
       })
       .catch(console.error);
 
     return () => {
-      socket?.off("message");
-      socket?.off("typing");
+      socket?.off("message", onMessage);
+      socket?.off("typing", onTyping);
+      if (typingTimeout.current) clearTimeout(typingTimeout.current);
     };
-  }, [roomId, currentUserId]);
+  }, [roomId, currentUserId, socket]);
 
   const sendMessage = async (content: string) => {
     if (!content.trim()) return;
-    const tempMessage: Message = {
+    const tempMessage: any = {
       id: `temp-${Date.now()}`,
       chat_room_id: roomId,
       sender_id: currentUserId,
+      recipient_id: recipientId, // Add recipientId for notifications
       content,
       is_read: false,
       created_at: new Date(),

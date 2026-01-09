@@ -14,7 +14,19 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const newSocket = io("node-push-production.up.railway.app"); 
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "node-push-production.up.railway.app";
+    console.log("Connecting to socket at:", socketUrl);
+
+    const newSocket = io(socketUrl);
+
+    newSocket.on("connect", () => {
+      console.log("Socket connected successfully:", newSocket.id);
+    });
+
+    newSocket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
+
     setSocket(newSocket);
 
     return () => {

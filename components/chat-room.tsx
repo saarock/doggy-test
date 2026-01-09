@@ -17,7 +17,6 @@ import {
   ArrowLeft,
   MoreVertical,
   Send,
-  Loader2,
   Flag,
   Ban,
   UserIcon,
@@ -42,7 +41,7 @@ export function ChatRoom({ roomId, currentUserId, otherUser }: ChatRoomProps) {
     sendMessage,
     isTyping,
     sendTyping,
-  } = useChatSocket(roomId, currentUserId);
+  } = useChatSocket(roomId, currentUserId, otherUser.id);
 
   // Scroll to bottom when messages change
   useEffect(() => {
