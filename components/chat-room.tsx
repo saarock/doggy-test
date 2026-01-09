@@ -95,37 +95,47 @@ export function ChatRoom({ roomId, currentUserId, otherUser }: ChatRoomProps) {
   );
 
   return (
-    <div className="h-[calc(100vh-3.5rem)] pb-16 md:pb-0 flex flex-col bg-background">
+    <div className="h-[calc(100vh-3.5rem)] pb-16 md:pb-0 flex flex-col bg-background relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--color-primary)_0%,_transparent_30%),_radial-gradient(circle_at_bottom_left,_var(--color-accent)_0%,_transparent_30%)] opacity-5 pointer-events-none" />
+
       {/* Header */}
-      <header className="flex items-center gap-3 p-4 border-b bg-card">
+      <header className="flex items-center gap-4 px-6 py-5 border-b-4 border-primary/10 bg-background/40 backdrop-blur-2xl relative z-10 shadow-sm">
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
+          className="md:hidden rounded-xl hover:bg-primary/10 text-primary"
           onClick={() => router.back()}
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-6 h-6" />
         </Button>
         <Link
           href={`/profile/${otherUser.id}`}
-          className="flex items-center gap-3 flex-1"
+          className="flex items-center gap-4 flex-1 group"
         >
-          <Avatar className="w-10 h-10">
-            <AvatarImage
-              src={otherUser.avatar_url || undefined}
-              alt={otherUser.name}
-            />
-            <AvatarFallback>
-              {otherUser.name.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="w-12 h-12 rounded-[1.25rem] border-2 border-background shadow-lg transition-transform group-hover:scale-105 group-hover:rotate-3">
+              <AvatarImage
+                src={otherUser.avatar_url || undefined}
+                alt={otherUser.name}
+              />
+              <AvatarFallback className="bg-primary/10 text-primary font-black">
+                {otherUser.name.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            {otherUser.is_online && (
+              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-4 border-background" />
+            )}
+          </div>
           <div>
-            <h2 className="font-semibold">{otherUser.name}</h2>
-            <p className="text-xs text-muted-foreground">
-              {otherUser.is_online
-                ? "Online"
-                : `Last seen ${formatTime(otherUser.last_seen)}`}
-              {isTyping && " • Typing..."}
+            <h2 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">{otherUser.name}</h2>
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2">
+              {otherUser.is_online ? (
+                <span className="text-emerald-500">Online now</span>
+              ) : (
+                `Active ${formatTime(otherUser.last_seen)}`
+              )}
+              {isTyping && <span className="text-primary italic animate-pulse"> • Typing...</span>}
             </p>
           </div>
         </Link>
@@ -201,21 +211,21 @@ export function ChatRoom({ roomId, currentUserId, otherUser }: ChatRoomProps) {
                     )}
                     <div
                       className={cn(
-                        "max-w-[75%] px-3 py-2 rounded-2xl",
+                        "max-w-[80%] px-5 py-3.5 rounded-[1.75rem] shadow-sm font-bold leading-relaxed",
                         isOwn
-                          ? "bg-primary text-primary-foreground rounded-br-sm"
-                          : "bg-muted text-foreground rounded-bl-sm"
+                          ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-none shadow-xl shadow-primary/10"
+                          : "bg-white dark:bg-card text-foreground rounded-bl-none border-4 border-muted shadow-lg shadow-muted/5"
                       )}
                     >
-                      <p className="text-sm whitespace-pre-wrap break-words">
+                      <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
                         {msg.content}
                       </p>
                       <p
                         className={cn(
-                          "text-[10px] mt-1",
+                          "text-[9px] mt-1.5 font-bold uppercase tracking-wider",
                           isOwn
                             ? "text-primary-foreground/70"
-                            : "text-muted-foreground"
+                            : "text-muted-foreground/60"
                         )}
                       >
                         {formatTime(msg.created_at)}
@@ -231,19 +241,19 @@ export function ChatRoom({ roomId, currentUserId, otherUser }: ChatRoomProps) {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t bg-card">
-        <div className="flex items-center gap-2">
+      <div className="p-4 border-t-2 border-muted bg-card">
+        <div className="flex items-center gap-3 bg-muted/30 p-1.5 rounded-[2rem] border-2 border-muted shadow-inner">
           <Input
             ref={inputRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
-            className="flex-1"
+            className="flex-1 border-0 bg-transparent focus-visible:ring-0 shadow-none px-4 h-11 text-base font-medium"
             maxLength={1000}
           />
-          <Button size="icon" onClick={handleSend} disabled={!message.trim()}>
-            <Send className="w-4 h-4" />
+          <Button size="icon" onClick={handleSend} disabled={!message.trim()} className="rounded-full w-11 h-11 shadow-lg shadow-primary/20 group hover:scale-105 transition-transform">
+            <Send className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </Button>
         </div>
       </div>

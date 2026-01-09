@@ -51,39 +51,42 @@ export function MapView({ center, users, onUserSelect, selectedUserId }: MapView
   return (
     <div
       ref={containerRef}
-      className="w-full h-full bg-muted/30 relative overflow-hidden"
+      className="w-full h-full bg-muted/20 relative overflow-hidden"
       style={{
         backgroundImage: `
-          radial-gradient(circle at center, transparent 0%, var(--background) 70%),
+          radial-gradient(circle at center, transparent 0%, var(--background) 80%),
           linear-gradient(to bottom, transparent, var(--background)),
           repeating-linear-gradient(
             0deg,
             transparent,
-            transparent 40px,
-            var(--border) 40px,
-            var(--border) 41px
+            transparent 60px,
+            oklch(from var(--primary) l c h / 0.05) 60px,
+            oklch(from var(--primary) l c h / 0.05) 61px
           ),
           repeating-linear-gradient(
             90deg,
             transparent,
-            transparent 40px,
-            var(--border) 40px,
-            var(--border) 41px
+            transparent 60px,
+            oklch(from var(--primary) l c h / 0.05) 60px,
+            oklch(from var(--primary) l c h / 0.05) 61px
           )
         `,
       }}
     >
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-accent/5 pointer-events-none" />
       {/* Center marker (current user) */}
       <div
-        className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
+        className="absolute z-20 -translate-x-1/2 -translate-y-1/2 group"
         style={{ left: dimensions.width / 2, top: dimensions.height / 2 }}
       >
         <div className="relative">
-          <div className="w-4 h-4 rounded-full bg-primary animate-ping absolute inset-0 opacity-30" />
-          <div className="w-4 h-4 rounded-full bg-primary border-2 border-background shadow-lg relative" />
+          <div className="w-6 h-6 rounded-full bg-primary animate-ping absolute inset-0 opacity-40" />
+          <div className="w-8 h-8 rounded-2xl bg-primary border-4 border-background shadow-2xl relative flex items-center justify-center rotate-45">
+            <div className="w-3 h-3 rounded-full bg-background -rotate-45" />
+          </div>
         </div>
-        <span className="absolute top-6 left-1/2 -translate-x-1/2 text-xs font-medium whitespace-nowrap bg-background/80 px-2 py-0.5 rounded">
-          You
+        <span className="absolute top-10 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase tracking-widest whitespace-nowrap bg-primary text-primary-foreground px-3 py-1 rounded-full shadow-lg">
+          You are here
         </span>
       </div>
 
@@ -100,41 +103,49 @@ export function MapView({ center, users, onUserSelect, selectedUserId }: MapView
             key={user.id}
             type="button"
             className={cn(
-              "absolute z-10 -translate-x-1/2 -translate-y-1/2 transition-all duration-200",
-              "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full",
-              isSelected && "z-30 scale-110",
+              "absolute z-10 -translate-x-1/2 -translate-y-1/2 transition-all duration-300",
+              "focus:outline-none focus:ring-4 focus:ring-primary/20 rounded-2xl",
+              isSelected && "z-30 scale-125",
+              !isSelected && "hover:scale-110"
             )}
             style={{ left: pos.x, top: pos.y }}
             onClick={() => onUserSelect(user)}
           >
             <div className="relative">
               <Avatar
-                className={cn("w-10 h-10 border-2 border-background shadow-lg", isSelected && "ring-2 ring-primary")}
+                className={cn(
+                  "w-12 h-12 rounded-2xl border-4 border-background shadow-xl transition-all",
+                  isSelected ? "ring-4 ring-primary border-primary" : "border-background"
+                )}
               >
                 <AvatarImage src={user.avatar_url || undefined} alt={user.name} />
-                <AvatarFallback className="bg-secondary text-secondary-foreground text-sm">
-                  {user.name.charAt(0).toUpperCase()}
+                <AvatarFallback className="bg-primary/10 text-primary font-black text-xs">
+                  {user.name.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               {user.is_online && (
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-background" />
+                <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-4 border-card animate-pulse" />
               )}
             </div>
-            <span className="absolute top-12 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap bg-background/90 px-2 py-0.5 rounded shadow">
+            <div className={cn(
+              "absolute top-14 left-1/2 -translate-x-1/2 text-[9px] font-black uppercase tracking-widest whitespace-nowrap transition-all",
+              isSelected ? "bg-primary text-primary-foreground scale-110" : "bg-card text-muted-foreground",
+              "px-3 py-1 rounded-full shadow-lg border-2 border-muted"
+            )}>
               {user.distance_km < 1 ? `${Math.round(user.distance_km * 1000)}m` : `${user.distance_km.toFixed(1)}km`}
-            </span>
+            </div>
           </button>
         )
       })}
 
       {/* Radius indicator */}
       <div
-        className="absolute rounded-full border border-primary/20 bg-primary/5 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+        className="absolute rounded-full border-4 border-dashed border-primary/10 bg-primary/5 -translate-x-1/2 -translate-y-1/2 pointer-events-none animate-in fade-in zoom-in duration-1000"
         style={{
           left: dimensions.width / 2,
           top: dimensions.height / 2,
-          width: Math.min(dimensions.width, dimensions.height) * 0.8,
-          height: Math.min(dimensions.width, dimensions.height) * 0.8,
+          width: Math.min(dimensions.width, dimensions.height) * 0.85,
+          height: Math.min(dimensions.width, dimensions.height) * 0.85,
         }}
       />
     </div>

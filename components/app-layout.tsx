@@ -37,32 +37,38 @@ export function AppLayout({ children, user }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {
-     <UserbackWidget
-        userId={user?.id}
-        name={user.name}
-        email={user?.email ?? undefined}
-      />
-     }
+        <UserbackWidget
+          userId={user?.id}
+          name={user.name}
+          email={user?.email ?? undefined}
+        />
+      }
       {/* Top Navigation */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/discover" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Dog className="w-4 h-4 text-primary-foreground" />
+      <header className="sticky top-0 z-50 border-b-4 border-primary/10 bg-background/40 backdrop-blur-2xl transition-all duration-300">
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+          <Link href="/discover" className="flex items-center gap-3 active:scale-95 transition-transform group">
+            <div className="w-12 h-12 rounded-[1.25rem] bg-gradient-to-br from-primary via-accent to-secondary flex items-center justify-center shadow-xl shadow-primary/30 rotate-3 group-hover:rotate-12 transition-transform">
+              <Dog className="w-8 h-8 text-white" />
             </div>
-            <span className="font-semibold hidden sm:inline">Doggy</span>
+            <span className="font-black text-3xl tracking-tighter hidden sm:inline bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary">Doggy</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-3" aria-label="Main navigation">
             {navigation.map((item) => (
               <Link key={item.name} href={item.href}>
                 <Button
-                  variant={pathname === item.href ? "secondary" : "ghost"}
-                  size="sm"
-                  className={cn("gap-2", pathname === item.href && "font-medium")}
+                  variant={pathname === item.href ? "default" : "ghost"}
+                  className={cn(
+                    "h-11 gap-2.5 rounded-[1.25rem] transition-all duration-500 focus-ring-vibrant",
+                    pathname === item.href
+                      ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-xl shadow-primary/20 scale-105 font-black px-6"
+                      : "font-bold text-muted-foreground hover:bg-primary/10 hover:text-primary px-5"
+                  )}
+                  aria-label={`Navigate to ${item.name}`}
+                  aria-current={pathname === item.href ? "page" : undefined}
                 >
-                  <item.icon className="w-4 h-4" />
+                  <item.icon className={cn("w-5 h-5", pathname === item.href && "animate-pulse")} aria-hidden="true" />
                   {item.name}
                 </Button>
               </Link>
@@ -98,8 +104,13 @@ export function AppLayout({ children, user }: AppLayoutProps) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => app.signOut()} className="text-destructive cursor-pointer">
-                <LogOut className="w-4 h-4 mr-2" />
+              <DropdownMenuItem
+                onClick={() => app.signOut()}
+                className="text-destructive cursor-pointer font-bold hover:bg-destructive/10 focus:bg-destructive/10 gap-3 py-3"
+              >
+                <div className="w-8 h-8 rounded-xl bg-destructive/10 flex items-center justify-center">
+                  <LogOut className="w-4 h-4" />
+                </div>
                 Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -111,21 +122,27 @@ export function AppLayout({ children, user }: AppLayoutProps) {
       <main className="flex-1">{children}</main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-pb">
-        <div className="flex items-center justify-around h-16">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors",
-                pathname === item.href ? "text-primary" : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="text-xs">{item.name}</span>
-            </Link>
-          ))}
+      <nav className="md:hidden fixed bottom-8 left-6 right-6 z-50" aria-label="Mobile navigation">
+        <div className="bg-background/40 backdrop-blur-3xl border-4 border-primary/20 rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(var(--color-primary),0.3)] overflow-hidden">
+          <div className="flex items-center justify-around h-24">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center gap-2 px-8 py-4 rounded-2xl transition-all duration-300 active:scale-75 focus-ring-vibrant",
+                  pathname === item.href
+                    ? "text-primary scale-125 drop-shadow-[0_0_12px_rgba(var(--color-primary),0.5)]"
+                    : "text-muted-foreground/60 hover:text-primary hover:bg-primary/5"
+                )}
+                aria-label={`Navigate to ${item.name}`}
+                aria-current={pathname === item.href ? "page" : undefined}
+              >
+                <item.icon className={cn("w-7 h-7", pathname === item.href && "animate-bounce-gentle")} aria-hidden="true" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">{item.name}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </nav>
     </div>
