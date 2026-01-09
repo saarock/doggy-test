@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useSocket } from "@/lib/socket"
 import { toast } from "@/hooks/use-toast"
